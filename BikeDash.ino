@@ -127,6 +127,9 @@ void readEPROM() {
   EEPROM.get(0,EpromData);
 }
 
+
+/* new comment */
+
 void updateEPROM() {
   //save values in EEPROM that we want to keep across power cycles.
   EpromData.writeCount++;
