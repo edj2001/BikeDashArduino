@@ -8,6 +8,12 @@
 #include <eRCaGuy_analogReadXXbit.h>
 #include <EEPROM.h>
 
+
+// calculate Analog Reference Voltage from built-in 1.1V reference
+#include <AnalogVRef.h>
+
+//float VAREF;
+
 struct EEPROMStore {
   double BatteryAmpSeconds;
   double BatteryAmpHours;
@@ -86,6 +92,15 @@ void updateCurrentReadings(){
   bits_of_precision = 12; //bits of precision for the ADC (Analog to Digital Converter)
   double Vzerocurrent; //the current sensor outputs 1/2 supply voltage at 0 current.
   
+    // calculate Analog Reference voltage by measuring internal 1.1V reference
+// these are 2 different versions of the same thing.
+    Vin_ARef = read_vin_mv()/1000.0;  //this seems a bit flaky
+    VCC_ARef = readVcc()/1000.0;      //this seems solid
+
+    // fudge factor varies by board.
+    VAREF = VCC_ARef*0.9541;
+    //maybe smooth this result?
+    
     //Read the battery current
   analog_reading = adc.analogReadXXbit(IB_PIN,bits_of_precision,num_samples); //get the avg. of [num_samples] 12-bit readings
   V = analog_reading/MAX_READING_12_bit*VAREF; //voltage
