@@ -93,20 +93,25 @@ void updateCurrentReadings(){
   bits_of_precision = 12; //bits of precision for the ADC (Analog to Digital Converter)
   double Vzerocurrent; //the current sensor outputs 1/2 supply voltage at 0 current.
   
-    // calculate Analog Reference voltage by measuring internal 1.1V reference
-// these are 2 different versions of the same thing.
-    Vin_ARef = read_vin_mv()/1000.0;  //this seems a bit flaky
-    VCC_ARef = readVcc()/1000.0;      //this seems solid
+  // calculate Analog Reference voltage by measuring internal 1.1V reference
+  // these are 2 different versions of the same thing.
+  Vin_ARef = read_vin_mv()/1000.0;  //this seems a bit flaky
+  VCC_ARef = readVcc()/1000.0;      //this seems solid
 
-    // fudge factor varies by board.
-    VAREF = VCC_ARef*0.9541;
-    //maybe smooth this result?
+  // fudge factor varies by board.
+  VAREF = VCC_ARef*0.9724;
+  //maybe smooth this result?
     
-    //Read the battery current
+  //Read the battery current
   analog_reading = adc.analogReadXXbit(IB_PIN,bits_of_precision,num_samples); //get the avg. of [num_samples] 12-bit readings
   V = analog_reading/MAX_READING_12_bit*VAREF; //voltage
   Vzerocurrent = VAREF / 2.0;
   IBattery = (V-Vzerocurrent)*IBatteryScale;  //Battery Current in Amps.
+  Serial.print("VRef: ");
+  Serial.print(VAREF,4);
+  Serial.print(" IBattery: ");
+  Serial.print(IBattery,4);
+  Serial.println("");
 
   //Calculate the battery charge used.
   EpromData.BatteryAmpSeconds = EpromData.BatteryAmpSeconds + IBattery * tIntervalCurrent;
@@ -115,6 +120,12 @@ void updateCurrentReadings(){
     EpromData.BatteryAmpSeconds = EpromData.BatteryAmpSeconds - 36.0;
     }
   
+  
+}
+
+void clearChargeUsed() {
+    EpromData.BatteryAmpHours = 0.0;
+    EpromData.BatteryAmpSeconds = 0.0;
   
 }
 
@@ -169,13 +180,13 @@ void checkPowerFailure() {
 void processCommands(){
   String inCommand;
   //process any commands from serial line
-  if (Serial.available() > 0) {
-    inCommand = Serial.readStringUntil('\n');
+  if (swSerial.available() > 0) {
+    inCommand = swSerial.readStringUntil('\n');
   }
   inCommand.toLowerCase();
   //battery has been recharged, reset usage
   if (inCommand.equalsIgnoreCase("rq:C9F64A58")){
-    
+    clearChargeUsed();
   }
   //dump EPROM data
   if (inCommand.equalsIgnoreCase("eprom")) {
