@@ -11,8 +11,10 @@
 
 // calculate Analog Reference Voltage from built-in 1.1V reference
 #include <AnalogVRef.h>
+double Vin_ARef;
+double VCC_ARef;
+double VAREF;
 
-//float VAREF;
 
 struct EEPROMStore {
   double BatteryAmpSeconds;
@@ -48,7 +50,6 @@ const char BatteryUsed_STRING[] = "qbused=";
 
 bool powerFailed = false;
 
-double VAREF;
 double V; //Voltage calculated on the analog pin
 double analog_reading; //the ADC reading
 double VBmultiplier = 42/4.2;
