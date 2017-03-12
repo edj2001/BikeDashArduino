@@ -52,7 +52,7 @@ bool powerFailed = false;
 
 double V; //Voltage calculated on the analog pin
 double analog_reading; //the ADC reading
-double VBmultiplier = 42/4.2;
+double VBmultiplier = 11.0;
 double VBattery;
 double IBattery;
 double IBatteryScale=10.0; // Amps/Volt of Input (100 mV/Amp)
