@@ -21,9 +21,13 @@ struct EEPROMStore {
   double BatteryAmpHours;
   int writeCount;
   unsigned long CRC;
+  unsigned long structVersion;
 };
 
-EEPROMStore EpromData = {0.0,0.0,0,0};
+// ascii characters BD10 in HEX = 42 44 31 30
+const unsigned long  EEPROMVersion = 0x42443130;
+
+EEPROMStore EpromData = {0.0,0.0,0,0,EEPROMVersion};
 
 
 const uint8_t PUSHBUTTON_PIN = 3;
@@ -154,15 +158,22 @@ void readEPROM() {
   EEPROM.get(0,EpromData);
 }
 
-
-/* new comment */
-
 void updateEPROM() {
   //save values in EEPROM that we want to keep across power cycles.
   EpromData.writeCount++;
   EEPROM.put(0,EpromData);
 }
 
+void initializeEPROM() {
+  //check if the EPROM has been initialized.
+  //initialize it if it has not
+  EEPROMStore EpromTestRead;
+  EEPROM.get(0,EpromTestRead);
+  if !(EpromTestRead.structVersion == EEPROMVersion) {
+    updateEPROM();
+  }
+  
+}
 void checkPowerFailure() {
   //If battery voltage falls below threshold value, 
   // then save values to EPROM.
@@ -228,6 +239,7 @@ void setup() {
   VAREF = 5.0;
 
   //initialize the EEPROM the first time the program runs.
+  initializeEPROM();
   //updateEPROM();
   //restore saved values from EEPROM
   readEPROM();
